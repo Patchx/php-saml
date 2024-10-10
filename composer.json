@@ -16,7 +16,7 @@
         "source": "https://github.com/Patchx/php-saml/"
     },
     "require": {
-        "php": ">=5.3.2 <7.2",
+        "php": ">=8.0",
         "ext-curl": "*",
         "ext-openssl": "*",
         "ext-dom": "*",
