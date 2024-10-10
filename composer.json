@@ -1,5 +1,5 @@
 {
-    "name": "Patchx/php-saml",
+    "name": "patchx/php-saml",
     "description": "PHP SAML Toolkit",
     "license": "MIT",
     "keywords": ["saml", "saml2", "onelogin"],
