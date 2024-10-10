@@ -1,8 +1,7 @@
 {
-    "name": "onelogin/php-saml",
+    "name": "Patchx/php-saml",
     "description": "PHP SAML Toolkit",
     "license": "MIT",
-    "homepage": "https://developers.onelogin.com/saml/php",
     "keywords": ["saml", "saml2", "onelogin"],
     "autoload": {
         "classmap": [
@@ -12,9 +11,9 @@
         ]
     },
     "support": {
-        "email": "sixto.garcia@onelogin.com",
-        "issues": "https://github.com/onelogin/php-saml/issues",
-        "source": "https://github.com/onelogin/php-saml/"
+        "email": "robert.anderson.fl@gmail.com",
+        "issues": "https://github.com/Patchx/php-saml/issues",
+        "source": "https://github.com/Patchx/php-saml/"
     },
     "require": {
         "php": ">=5.3.2 <7.2",
