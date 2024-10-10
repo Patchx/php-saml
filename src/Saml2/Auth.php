@@ -230,9 +230,11 @@ class Auth
     {
         $this->_errors = array();
         $this->_lastError = $this->_lastErrorException = null;
-        if (isset($_POST['SAMLResponse'])) {
+        $saml_response = request()->get('SAMLResponse');
+        
+        if ($saml_response) {
             // AuthnResponse -- HTTP_POST Binding
-            $response = new Response($this->_settings, $_POST['SAMLResponse']);
+            $response = new Response($this->_settings, $saml_response);
             $this->_lastResponse = $response->getXMLDocument();
 
             if ($response->isValid($requestId)) {
