@@ -429,6 +429,11 @@ class Response
 
                 // If find a Signature on the Response, validates it checking the original response
                 if ($hasSignedResponse && !Utils::validateSign($this->document, $cert, $fingerprint, $fingerprintalg, Utils::RESPONSE_SIGNATURE_XPATH, $multiCerts)) {
+                    // Rob added
+                    if (env('SAML_SHOULD_CURL_ERROR_DETAILS') && env('SAML_ERROR_REPORTING_URL')) {
+                        $this->sendErrorDetailsToUrl('Response');
+                    }
+                    
                     throw new ValidationError(
                         "Signature validation failed. SAML Response rejected",
                         ValidationError::INVALID_SIGNATURE
@@ -438,6 +443,11 @@ class Response
                 // If find a Signature on the Assertion (decrypted assertion if was encrypted)
                 $documentToCheckAssertion = $this->encrypted ? $this->decryptedDocument : $this->document;
                 if ($hasSignedAssertion && !Utils::validateSign($documentToCheckAssertion, $cert, $fingerprint, $fingerprintalg, Utils::ASSERTION_SIGNATURE_XPATH, $multiCerts)) {
+                    // Rob added
+                    if (env('SAML_SHOULD_CURL_ERROR_DETAILS') && env('SAML_ERROR_REPORTING_URL')) {
+                        $this->sendErrorDetailsToUrl('Assertion');
+                    }
+                    
                     throw new ValidationError(
                         "Signature validation failed. SAML Response rejected",
                         ValidationError::INVALID_SIGNATURE
@@ -1240,6 +1250,49 @@ class Response
             return $this->decryptedDocument;
         } else {
             return $this->document;
+        }
+    }
+
+    // Rob added
+    private function sendErrorDetailsToUrl($type)
+    {
+        $errorDetails = [
+            'timestamp' => date('Y-m-d H:i:s'),
+            'signature_type' => $type,
+            'raw_response' => $this->response,
+            'certificate' => $this->_settings->getIdPData()['x509cert'] ?? null,
+            'fingerprint' => $this->_settings->getIdPData()['certFingerprint'] ?? null,
+            'fingerprint_algorithm' => $this->_settings->getIdPData()['certFingerprintAlgorithm'] ?? null,
+            'issuer' => $this->getIssuers(),
+            'audience' => $this->getAudiences(),
+            'request_id' => $this->document->documentElement->getAttribute('InResponseTo'),
+            'destination' => $this->document->documentElement->getAttribute('Destination'),
+            'server_vars' => [
+                'HTTP_HOST' => request()->getHost() ?? null,
+                'REQUEST_URI' => request()->getRequestUri() ?? null,
+                'HTTP_REFERER' => request()->header('referer') ?? null,
+                'REMOTE_ADDR' => request()->ip() ?? null,
+            ]
+        ];
+
+        $remoteUrl = env('SAML_ERROR_REPORTING_URL');
+        
+        $ch = curl_init($remoteUrl);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($errorDetails));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        
+        // Optional: Add error handling
+        try {
+            $response = curl_exec($ch);
+            if (curl_errno($ch)) {
+                error_log('Failed to send SAML error details: ' . curl_error($ch));
+            }
+        } catch (Exception $e) {
+            error_log('Exception while sending SAML error details: ' . $e->getMessage());
+        } finally {
+            curl_close($ch);
         }
     }
 }
