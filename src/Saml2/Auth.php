@@ -662,6 +662,12 @@ class Auth
         return $this->_lastRequestID;
     }
 
+    // Rob added this Feb 2025
+    public function setLastRequestID($input)
+    {
+        return $this->_lastRequestID = $input;
+    }
+    
     /**
      * Creates an AuthnRequest
      *
@@ -796,6 +802,12 @@ class Auth
         return $this->_lastRequest;
     }
 
+    // Rob added this on Feb 2025
+    public function setLastRequestXML($input)
+    {
+        return $this->_lastRequest = $input;
+    }
+    
     /**
      * Returns the most recently-constructed/processed
      * XML SAML response (SAMLResponse, LogoutResponse).
